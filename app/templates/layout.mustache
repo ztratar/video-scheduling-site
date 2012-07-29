@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Airety</title>
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/app.css" type="text/css" />
+  <script src="http://192.168.1.148:8000/socket.io/socket.io.js"></script>
+  {{&javascriptBlock}}
+  <script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
+</head>
+
+<body>
+
+  <div id="fb-root"></div>
+  <script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '298742266870365',
+        status     : true, 
+        cookie     : true,
+        xfbml      : true,
+        oauth      : true,
+      });
+    };
+    (function(d){
+       var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+       js = d.createElement('script'); js.id = id; js.async = true;
+       js.src = "//connect.facebook.net/en_US/all.js";
+       d.getElementsByTagName('head')[0].appendChild(js);
+     }(document));
+   </script>
+   <script>
+     	/*window.airety.currentUser = {
+				id: 1,
+                name: 'Zach Tratar',
+                first_name: 'Zach',
+                last_name: 'Tratar',
+				picture: {
+					src: 'http://localhost:8000/static/img/zach.png'
+				}
+			};*/
+   </script>
+
+   <div id="dialog">
+     <div id="dialog-container"></div>
+   </div>
+
+  <div id="header">
+    <div id="innerHeader">
+      <div id="hostButton-container"></div>
+      <h1 id="logo">Airety</h1>
+      <div id="dropdown-container"></div>
+    </div>
+  </div>
+
+  <div id="primaryContainer" class=""></div>
+
+</body>
+
+</html>
+

@@ -1,0 +1,215 @@
+<script id="headerDropdown-template" type="text/template">
+  <a href="#" class="dropdownTrigger">
+    <img class="avatar" src="{{picture.src}}">
+    <h4>{{name}}</h4>
+  </a>
+  <ul class="dropdown">
+    <li>
+      <a href="#" id="editProfile">Edit profile</a>
+    </li>
+    <li>
+      <a href="/users/sign_out" data-method="delete">Sign out</a>
+    </li>
+  </ul>
+</script>
+
+<script id="hostButton-template" type="text/template">
+  <a href="#" id="hostButton" class="button greenButton">Host chats</a>
+</script>
+
+<script id="homeView-template" type="text/template">
+  <div class="top-container"></div>
+  <div class="stream-container"></div>
+</script>
+
+<script id="chatView-template" type="text/template">
+  <div class="chatCall-container">
+    <div class="card-column">
+      <div class="myChat-container">
+        <div id="myChat"></div>
+        <div class="corner1"></div>
+        <div class="corner2"></div>
+        <div class="corner3"></div>
+        <div class="corner4"></div>
+      </div>
+      <div class="card-container"></div>
+    </div>
+    <div class="chat-column"></div>
+  </div>
+</script>
+
+<script id="chatColumnView-template" type="text/template">
+  <div class="chatVideos">
+    <div class="othersChat-container">
+      <div class="corner1"></div>
+      <div class="corner2"></div>
+      <div class="corner3"></div>
+      <div class="corner4"></div>
+    </div>
+  </div>
+  <div class="textChat-container"></div>
+</script>
+
+<script id="textChatView-template" type="text/template">
+  <div class="textChat">
+    <ul class="messages"></ul>
+    <form class="send-message">
+      <input type="text" name="message" placeholder="Chat here..." />
+      <a href="#" class="submit-message button">Send</a>
+    </form>
+  </div>
+</script>
+
+<script id="textChatItemView-template" type="text/template">
+  <img src="{{picture}}" %>">
+  <p class="message"><strong>{{name}}: </strong>{{message}}</p>
+</script>
+
+<script id="registrationView-template" type="text/template">
+  <div class="whiteCard headerPop">
+    <h2>Learn from others through scheduled video chats</h2>
+    <a class="logInWithFacebook" href="#">Log in with facebook</a>
+    <p class="privacyNotif">We will help you find people to talk to based on your interests. <br />We will never, ever violate your privacy.</p>
+  </div>
+</script>
+
+<script id="chatsTodayView-template" type="text/template">
+  <div class="whiteCard chatHeaderPop">
+    <ul>
+    </ul>
+  </div>
+</script>
+
+<script id="chatsTodayItemView-template" type="text/template">
+  <img src="{{picture}}">
+  <div class="info">
+    <span>You have a chat with Zach in:</span>
+    <span class="timer">2 hrs, 36 mins</span>
+    <span class="sub-time">(that's 7:00PM)</span>
+  </div>
+  <div class="buttonCol">
+    <a href="#" class="button">Enter Room</a>
+  </div>
+</script>
+
+<script id="userCardView-template" type="text/template">
+  <div class="whiteCard onStream">
+    <div class="imgContainer">
+      {{^extended}}
+      <a href="#" class="button darkShadow">Schedule a chat</a>
+      {{/extended}}
+      <img class="lazy" src="/static/img/grey.gif" data-original="{{model.picture.src}}" width="{{model.picture.width}}" height="{{model.picture.height}}">
+      <h3 class="name">{{model.name}}</h3>
+    </div>
+    <p class="userDescription">
+      I want to help midwestern entrepreneurs gain insight of what life is like in Silicon Valley.
+    </p>
+  </div>
+  <ul class="darkCard compressSides">
+    <li class="listItem">
+      <img src="">
+      <div class="withImage">
+        <h4 class="title">Backplane</h4>
+        <p class="description">Product Engineer</p>
+      </div>
+    </li> 
+    <li class="listItem">
+      <img src="">
+      <div class="withImage">
+        <h4 class="title">Backplane</h4>
+        <p class="description">Product Engineer</p>
+      </div>
+    </li> 
+  </ul>
+</script>
+
+<script id="scheduleChatDialogView-template" type="text/template">
+  <div class="card-column"></div>
+  <div class="schedule-column whiteCard">
+    <h3>Zach is probably free at the following times:</h3>
+    <p>Pick all of the times that work for you. Zach will confirm one.</p>
+    <form id="schedule-slots-form">
+      <ul class="scheduleSlots">
+        <li>
+          <span class="checkboxContainer">
+            <input name="slot" type="checkbox">
+          </span>
+          <span class="day">Monday, April 21st</span>
+          <span class="time">9:00PM</span>
+          </li>
+        <li>
+          <span class="checkboxContainer">
+            <input name="slot" type="checkbox">
+          </span>
+          <span class="day">Tuesday, April 22nd</span>
+          <span class="time">10:00PM</span>
+        </li>
+
+      </ul>
+      <div class="textAreaWrap">
+        <textarea name="why" placeholder="Why do you want to talk to Zach?"></textarea>
+      </div>
+      <div>
+        <a class="button">Send chat request</a>
+      </div>
+    </form>
+  </div>
+</script>
+
+<script id="hostChatsDialogView-template" type="text/template">
+  <div class="whiteCard">
+    <div class="host-chats-info">
+      <img src="{{picture}}">
+      <h3><strong>You're awesome.</strong> Thanks for helping others.</h3>
+      <p class="avg-week">Simply tell us when you'd prefer to chat on an <span>average week</span>.</p>
+      <p class="no-worries">Don't worry. You're not making any promises. When others suggest times to chat, you will be able to confirm specifics then.</p>
+    </div>
+    <table class="host-chats-table">
+        <tr class="host-chats-table-row small">
+          <td></td>
+          <td>Monday</td>
+          <td>Tuesday</td>
+          <td>Wednesday</td>
+          <td>Thursday</td>
+          <td>Friday</td>
+          <td>Saturday</td>
+          <td>Sunday</td>
+      </tr>
+    </table>
+    <div class="buttonCenter">
+      <a class="button">Done!</a>
+    </div>
+  </div>
+</script>
+
+<script id="editProfileDialogView-template" type="text/template">
+  <div class="card-column"></div>
+  <div class="user-info-settings-column">
+    <div class="user-info-settings whiteCard">
+        <div class="display-in-card-header">Display in card?</div>
+        <ul class="user-info-list"></ul>
+        <a class="user-info-settings-adder user-info-setting-work" href="#">+ Add Work</a>
+        <a class="user-info-settings-adder user-info-setting-school" href="#">+ Add School</a>
+        <a class="user-info-settings-adder user-info-setting-location" href="#">+ Add Location</a>
+    </div>
+    <a href="#" class="user-info-settings-done button">Done</a>
+  </div>
+</script>
+
+<script id="editProfileDialogListItem-template" type="text/template">
+  <div class="listItem-col1">
+    <img src="">
+    <div class="withImage">
+      <h4 class="title">Backplane</h4>
+      <p class="description">Product Engineer</p>
+    </div>
+  </div>
+  <div class="listItem-col2">
+    <a href="#" class="display-in-card-yes">Yes</a>
+    <a href="#" class="display-in-card-no">No</a>
+  </div>
+  <div class="listItem-col3">
+    <a href="#" class="remove-listItem button">Remove</a>
+  </div>
+</script>
+
