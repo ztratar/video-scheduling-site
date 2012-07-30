@@ -3,6 +3,9 @@
 import os
 from urllib2 import urlopen
 from simplejson import loads
+import simplejson
+import bson
+import bson.json_util
 
 def compress_cfg(static_url, static_root, dir, paths):
 	output = ''
@@ -35,3 +38,10 @@ def include_file(static_url, static_root, pathtofile):
 
 def get_data_from_url(url, access_token):
 	return loads(urlopen(url+'?access_token='+access_token).read())
+
+def model_encode(obj):
+	keys = bson.json_util._json_convert(obj)
+	returnObj = {}
+	for key in keys:
+		returnObj[key] = obj[key]
+	return bson.json_util.dumps(returnObj)

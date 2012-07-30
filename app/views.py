@@ -3,23 +3,13 @@ from django.http import HttpResponse
 from django.contrib.auth import login
 from mongoengine.queryset import DoesNotExist
 from querystring_parser import parser
-from bson.objectid import ObjectId
-import simplejson
+
+from airety.utils import model_encode 
 
 from app.models import *
 
 from app.layout_manager import LayoutManager
 renderer = LayoutManager()
-
-# Encoder
-class MongoEncoder(simplejson.JSONEncoder):
-	def default(self, obj, **kwargs):
-		if isinstance(obj, ObjectId):
-			return str(obj)
-		else:
-			return simplejson.JSONEncoder.default(self, obj, **kwargs)
-
-encoder = MongoEncoder()
 
 # Views
 def index(request):
@@ -49,7 +39,7 @@ def login_view(request):
             user.backend = 'mongoengine.django.auth.MongoEngineBackend'
             login(request, user)
             request.session.set_expiry(60 * 60 * 24 * 30) # 1 month timeout
-            return HttpResponse(encoder.encode(user))
+            return HttpResponse(model_encode(user))
         else:
             return HttpResponse('login failed')
     except DoesNotExist:
@@ -78,6 +68,6 @@ def login_view(request):
 			user.add_property('school', data['education'][i], 680)
 		for i in range(len(data['inspirational_people'])):
 			user.add_property('inspirational_person', data['inspirational_people'][i], 200)
-		return HttpResponse(simplejson.dumps(user))
+		return HttpResponse(model_encode(user))
 	#except Exception:
     #    return HttpResponse('unknown error')
