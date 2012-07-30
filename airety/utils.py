@@ -1,6 +1,8 @@
 # utils.py
 
 import os
+from urllib2 import urlopen
+from simplejson import loads
 
 def compress_cfg(static_url, static_root, dir, paths):
 	output = ''
@@ -30,4 +32,6 @@ def include_tree(static_url, static_root, dir, output):
 
 def include_file(static_url, static_root, pathtofile):
 	return '<script type="text/javascript" src="' + static_url + pathtofile +'"></script>\n  '
-	
+
+def get_data_from_url(url, access_token):
+	return loads(urlopen(url+'?access_token='+access_token).read())

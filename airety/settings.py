@@ -1,11 +1,19 @@
 import os
 import django
 from utils import compress_cfg
+import mongoengine
 
 # Django settings for airety project.
 
 DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+
+AUTHENTICATION_BACKENDS = (
+    'mongoengine.django.auth.MongoEngineBackend',
+)
+
+SESSION_ENGINE = 'mongoengine.django.sessions'
+mongoengine.connect('airety_dev')
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -140,7 +148,6 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 	'app',
-	'compress',
 )
 
 # A sample logging configuration. The only tangible logging

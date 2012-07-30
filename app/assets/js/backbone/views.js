@@ -302,7 +302,7 @@ $(function() {
 		template: $("#registrationView-template").html(),
 
 		events: {
-			'click a.logInWithFacebook': 'signup'
+			'click a.logInWithFacebook': 'signupLogin'
 		},
 
 		init: function() {
@@ -313,17 +313,18 @@ $(function() {
 			this.$el.html(this.template);
 		},
 
-		signup: function() {
-			var that = this;
+		signupLogin: function() {
+			var that = this,
+				accessToken;
             FB.getLoginStatus(function(response) {
           		if (response.status === 'connected') {
            			var uid = response.authResponse.userID;
-           			var accessToken = response.authResponse.accessToken;
-           			that.fbGetSignupData();
+           			accessToken = response.authResponse.accessToken;
+           			that.fbGetSignupData(accessToken);
          		} else {
 					FB.login(function(response) {
 						if (response.authResponse) {
-							that.fbGetSignupData();
+							that.fbGetSignupData(response.authResponse.accessToken);
 						}
 					}, {scope: 'email,user_location,user_hometown,user_work_history,user_education_history,user_interests,publish_actions'});
          		}
@@ -331,8 +332,22 @@ $(function() {
         	return false;
 		},
 
-		fbGetSignupData: function() {
+		fbGetSignupData: function(access_token) {
 			FB.api('/me', function(data) { 
+				console.log(access_token);
+				console.log(data);
+				data = $.extend(data, { access_token: access_token });
+				$.ajax({
+					url: '/login',
+					type: 'POST',
+					beforeSend: function(xhr) {
+						xhr.setRequestHeader("X-CSRFToken", window.airety.csrf); 
+					},
+					data: data,
+					success: function(data) {
+						console.log('returned', data);
+					}
+				});
 			});
 		},
 

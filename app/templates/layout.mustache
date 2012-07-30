@@ -3,7 +3,7 @@
 <head>
   <title>Airety</title>
   <link rel="stylesheet" href="{{ STATIC_URL }}css/app.css" type="text/css" />
-  <script src="http://192.168.1.148:8000/socket.io/socket.io.js"></script>
+  <script src="http://localhost:1337/socket.io/socket.io.js"></script>
   {{&javascriptBlock}}
   <script src="http://staging.tokbox.com/v0.91/js/TB.min.js"></script>
 </head>
@@ -29,6 +29,7 @@
      }(document));
    </script>
    <script>
+	   window.airety.csrf = '{{csrf_token}}';
      	/*window.airety.currentUser = {
 				id: 1,
                 name: 'Zach Tratar',
