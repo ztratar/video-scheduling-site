@@ -178,8 +178,9 @@ class User(MongoUser):
 					concentration_string += property_data['concentration'][i]['name'] + ', '
 				concentration_string = concentration_string[:-2]
 				propertyLink.position = concentration_string
-			propertyLink.save()
-			# todo: update affinity if link exists
+		else:
+			propertyLink.affinity = propertyLink.affinity + (affinity/10)
+		propertyLink.save()
 
 
 class Chat(Document):

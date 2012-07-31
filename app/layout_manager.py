@@ -7,6 +7,8 @@ from airety.utils import compress_cfg
 from django.conf import settings
 from django.core.context_processors import csrf
 
+from app.helpers import get_current_user, model_encode 
+
 pyRenderer = pystache.Renderer()
 pyLoader = Loader()
 
@@ -30,6 +32,9 @@ class LayoutManager(object):
 			return ''
 	
 	def render_with_layout(self, layout, page, pageVars, options, request):
+
+		user = get_current_user(request)
+
 		backboneTemplates = self.get_backbone_templates(options['withBackboneTemplates'])
 
 		c = {
@@ -38,6 +43,7 @@ class LayoutManager(object):
 			'STATIC_URL': settings.STATIC_URL
 		}
 		c.update(csrf(request))
+		if user:
+			c['currentUser'] = model_encode(user)
 
 		return pyRenderer.render_path('app/templates/'+layout+'.mustache', c) + backboneTemplates
-

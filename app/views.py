@@ -4,9 +4,8 @@ from django.contrib.auth import login
 from mongoengine.queryset import DoesNotExist
 from querystring_parser import parser
 
-from airety.utils import model_encode 
-
 from app.models import *
+from app.helpers import get_current_user, model_encode 
 
 from app.layout_manager import LayoutManager
 renderer = LayoutManager()
@@ -18,13 +17,10 @@ def index(request):
 	return HttpResponse(output)
 
 def home(request):
-	users = User.objects
 	output = renderer.render_with_layout(
 		'layout',
 		'index',
-		{
-			'test': 'me'
-		},
+		{},
 		{
 			'withBackboneTemplates': True
 		},
