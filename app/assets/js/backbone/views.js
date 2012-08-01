@@ -95,7 +95,8 @@ $(function() {
 
 		init: function(options) {
 			this.model.bind('change', this.renderDropdown, this);
-			this.model.bind('change', this.renderHostButton, this);		},
+			this.model.bind('change', this.renderHostButton, this);
+		},
 
 		renderDropdown: function() {
 			this.$("#dropdown-container").html( Mustache.render(this.dropdownTemplate, this.model.toJSON()) );	
@@ -334,8 +335,6 @@ $(function() {
 
 		fbGetSignupData: function(access_token) {
 			FB.api('/me', function(data) { 
-				console.log(access_token);
-				console.log(data);
 				data = $.extend(data, { access_token: access_token });
 				$.ajax({
 					url: '/login',
@@ -345,7 +344,7 @@ $(function() {
 					},
 					data: data,
 					success: function(data) {
-						console.log('returned', data);
+						window.airety.app.model.set(data);
 					}
 				});
 			});

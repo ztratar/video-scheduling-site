@@ -32,7 +32,6 @@ class LayoutManager(object):
 			return ''
 	
 	def render_with_layout(self, layout, page, pageVars, options, request):
-
 		backboneTemplates = self.get_backbone_templates(options['withBackboneTemplates'])
 		c = {
 			'innerBlock': pyRenderer.render_path('app/templates/'+page+'.mustache', pageVars),

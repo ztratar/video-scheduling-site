@@ -2,7 +2,7 @@ import urllib2
 
 from django.template import Context, loader
 from django.http import HttpResponse
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from mongoengine.queryset import DoesNotExist
 from querystring_parser import parser
 
@@ -32,6 +32,10 @@ def home(request):
 	)
 	return HttpResponse(output)
 
+def logout_view(request):
+	logout(request)
+	return home(request)
+
 def login_view(request):
     try:
         user = User.objects.get(fb_id=request.POST['id'])
@@ -39,7 +43,7 @@ def login_view(request):
             user.backend = 'mongoengine.django.auth.MongoEngineBackend'
             login(request, user)
             request.session.set_expiry(60 * 60 * 24 * 30) # 1 month timeout
-            return HttpResponse(model_encode(user))
+            return HttpResponse(model_encode(user), mimetype="application/json")
         else:
             return HttpResponse('login failed')
     except DoesNotExist:
@@ -73,6 +77,6 @@ def login_view(request):
 			user.add_property('school', data['education'][i], 680)
 		for i in range(len(data['inspirational_people'])):
 			user.add_property('inspirational_person', data['inspirational_people'][i], 200)
-		return HttpResponse(model_encode(user))
+		return HttpResponse(model_encode(user), mimetype="application/json")
 	#except Exception:
     #    return HttpResponse('unknown error')

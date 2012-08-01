@@ -6,32 +6,37 @@ $(function(){
 			
 			routes: {
 				'': 'index',
+				'logout': 'logout',
 				'chats/:id': 'chats'
 			},
 
 			index: function() {
+				var that = this,
+					logInAction = function() {
+						$("#primaryContainer").addClass('authed');
+						that.chatsToday = new airetyApp.collection.chats();
+						that.chatsTodayView = new airetyApp.view.chatsTodayView({
+							collection: that.chatsToday
+						});
+						that.chatsToday.add({
+							id: 3
+						}).add({
+							id: 4
+						}).add({
+							id: 5
+						});
+						that.homeView.showView('.top-container', that.chatsTodayView);
+						that.chatsTodayView.center();
+					};
 				this.homeView = new airetyApp.view.homeView();
 				window.airety.app.showView('#primaryContainer', this.homeView, { render: true });
 				
 				if ( !window.airety.app.model.get('id') ) {
 					this.registrationView = new airetyApp.view.registrationView();
 					this.homeView.showView('.top-container', this.registrationView, { render: true });
+					window.airety.app.model.on('change', logInAction);
 				} else {
-					$("#primaryContainer").addClass('authed');
-					this.chatsToday = new airetyApp.collection.chats();
-					this.chatsTodayView = new airetyApp.view.chatsTodayView({
-						collection: this.chatsToday
-					});
-					this.chatsToday.add({
-						id: 3
-					}).add({
-						id: 4
-					}).add({
-						id: 5
-					});
-
-					this.homeView.showView('.top-container', this.chatsTodayView);
-					this.chatsTodayView.center();
+					logInAction();
 				}
 
 				this.userStream = new airetyApp.collection.users();
@@ -42,6 +47,10 @@ $(function(){
 				this.userStreamView.setUp();
 				this.userStream.url = '/api/feed';
 				this.userStream.fetch();
+			},
+
+			logout: function() {
+				window.airety.route.navigate('', true);
 			},
 
 			chats: function(id) {
