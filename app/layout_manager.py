@@ -33,17 +33,17 @@ class LayoutManager(object):
 	
 	def render_with_layout(self, layout, page, pageVars, options, request):
 
-		user = get_current_user(request)
-
 		backboneTemplates = self.get_backbone_templates(options['withBackboneTemplates'])
-
 		c = {
 			'innerBlock': pyRenderer.render_path('app/templates/'+page+'.mustache', pageVars),
 			'javascriptBlock': javascript,
 			'STATIC_URL': settings.STATIC_URL
 		}
 		c.update(csrf(request))
-		if user:
-			c['currentUser'] = model_encode(user)
-
+		try:
+			user = get_current_user(request)
+			if user:
+				c['currentUser'] = model_encode(user)
+		except Exception:
+			c['currentUser'] = '{}'
 		return pyRenderer.render_path('app/templates/'+layout+'.mustache', c) + backboneTemplates

@@ -1,6 +1,6 @@
 <script id="headerDropdown-template" type="text/template">
   <a href="#" class="dropdownTrigger">
-    <img class="avatar" src="{{picture.src}}">
+    <img class="avatar" src="{{thumb_url}}">
     <h4>{{name}}</h4>
   </a>
   <ul class="dropdown">
@@ -98,7 +98,8 @@
       {{^extended}}
       <a href="#" class="button darkShadow">Schedule a chat</a>
       {{/extended}}
-      <img class="lazy" src="/static/img/grey.gif" data-original="{{model.picture.src}}" width="{{model.picture.width}}" height="{{model.picture.height}}">
+      <img class="lazy" src="/static/img/grey.gif"
+	  data-original="{{model.picture_url}}" width="{{model.picture_width}}" height="{{model.picture_height}}">
       <h3 class="name">{{model.name}}</h3>
     </div>
     <p class="userDescription">

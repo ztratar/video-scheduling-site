@@ -1,3 +1,5 @@
+import urllib2
+
 from django.template import Context, loader
 from django.http import HttpResponse
 from django.contrib.auth import login
@@ -6,6 +8,7 @@ from querystring_parser import parser
 
 from app.models import *
 from app.helpers import get_current_user, model_encode 
+from app.libs.getimageinfo import getImageInfo
 
 from app.layout_manager import LayoutManager
 renderer = LayoutManager()
@@ -17,6 +20,7 @@ def index(request):
 	return HttpResponse(output)
 
 def home(request):
+	userFeed = User.objects
 	output = renderer.render_with_layout(
 		'layout',
 		'index',
@@ -42,6 +46,7 @@ def login_view(request):
 		data = parser.parse(request.POST.urlencode())
 		user = User(
 			username = data['email'],
+			name = data['name'],
 			first_name = data['first_name'],
 			last_name = data['last_name'],
 			fb_id = data['id'],
@@ -54,6 +59,10 @@ def login_view(request):
 			locale = data['locale'],
 			gender = data['gender']
 		)
+		imgdata = urllib2.urlopen('https://graph.facebook.com/'+str(data['id'])+'/picture?type=large')
+		image_type,width,height = getImageInfo(imgdata)
+		user.picture_width = width
+		user.picture_height = height
 		user.save()
 		user.add_property('location', data['hometown'], 800)
 		user.add_property('location', data['location'], 900)

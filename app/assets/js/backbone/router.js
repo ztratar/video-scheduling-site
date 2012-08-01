@@ -40,16 +40,8 @@ $(function(){
 				});
 				this.homeView.showView('.stream-container', this.userStreamView);
 				this.userStreamView.setUp();
-				for(var i = 0; i < 30; i++){
-					this.userStream.add({ 
-						name: 'Zach Tratar',
-						picture: {
-							width: 180,
-							height: 270,
-							src: 'http://localhost:8000/static/img/zach.png'
-						}
-					});
-				}
+				this.userStream.url = '/api/feed';
+				this.userStream.fetch();
 			},
 
 			chats: function(id) {

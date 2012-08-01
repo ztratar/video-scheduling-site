@@ -486,9 +486,11 @@ $(function() {
 
 		addAll: function() {
 			var that = this;
-			this.activeChildren.each(function(child) { 
-				child.close();   
-			});
+			if (this.activeChildren) {
+				_.each(this.activeChildren, function(child) { 
+					child.close();   
+				});
+			}
 			this.activeChildren = [];
 			this.collection.each(function(user){
 				that.addOne(user)

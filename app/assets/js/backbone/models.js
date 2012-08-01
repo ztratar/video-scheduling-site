@@ -26,7 +26,23 @@
 	});
 
 	airetyApp.model.user = airetyApp.model.baseModel.extend({
-		urlRoot: '/users'
+		urlRoot: '/users',
+		initialize: function(options) {
+			this.on('change:fb_id', this.refreshImages);
+			if (options && options.fb_id) {
+				this.refreshImages();
+			}
+		},
+		refreshImages: function() {
+			if (!this.get('picture_url')) {
+				this.set('thumb_url',
+						 'https://graph.facebook.com/'+this.get('fb_id')+'/picture',
+						 { silent: true });
+				this.set('picture_url',
+						 'https://graph.facebook.com/'+this.get('fb_id')+'/picture?type=large',
+						 { silent: true });
+			}
+		}
 	});
 
 	airetyApp.model.chat = airetyApp.model.baseModel.extend({

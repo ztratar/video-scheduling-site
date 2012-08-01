@@ -54,6 +54,7 @@ class User(MongoUser):
 	def __unicode__(self):
 		return self.getFullName()
 
+	name = StringField(required=True)
 	first_name = StringField(required=True)
 	last_name = StringField(required=True)
 	email = StringField(required=True)
@@ -71,6 +72,8 @@ class User(MongoUser):
 	gender = StringField()
 	bio = StringField()
 	picture_url = StringField()
+	picture_width = IntField()
+	picture_height = IntField()
 	thumb_url = StringField()
 
 	has_availability = BooleanField(default=False)
@@ -179,6 +182,7 @@ class User(MongoUser):
 				concentration_string = concentration_string[:-2]
 				propertyLink.position = concentration_string
 		else:
+			propertyLink = propertyLink[0]
 			propertyLink.affinity = propertyLink.affinity + (affinity/10)
 		propertyLink.save()
 
