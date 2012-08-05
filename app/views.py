@@ -48,6 +48,12 @@ def login_view(request):
             return HttpResponse('login failed')
     except DoesNotExist:
 		data = parser.parse(request.POST.urlencode())
+		if not data.get('email'):
+			data['email'] = str(data['id']) + '@facebook.com'
+		if not data.get('username'):
+			data['username'] = data['email']
+		if not data.get('bio'):
+			data['bio'] = ''
 		user = User(
 			username = data['email'],
 			name = data['name'],
@@ -68,8 +74,10 @@ def login_view(request):
 		user.picture_width = width
 		user.picture_height = height
 		user.save()
-		user.add_property('location', data['hometown'], 800)
-		user.add_property('location', data['location'], 900)
+		if data.get('hometown'):
+			user.add_property('location', data['hometown'], 800)
+		if data.get('location'):
+			user.add_property('location', data['location'], 900)
 		for i in range(len(data['work'])):
 			work_score = 200 * (min(i,4)+1)/2
 			user.add_property('work', data['work'][i], work_score)

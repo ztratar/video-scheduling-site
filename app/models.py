@@ -29,7 +29,7 @@ class UserPropertyLink(Document):
 
 class UserAvailability(EmbeddedDocument):
 
-	# Day: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+	# Day: 0 = Monday, ..., 6 = Sunday 
 	day = IntField(required=True)
 
 	# Times: 0 = 12AM, 1 = 12:30AM, 2 = 1AM, ..., 47 = 11:30PM
@@ -115,6 +115,81 @@ class User(MongoUser):
 			return True
 		except Exception:
 			return False
+
+	def chats_this_week(self):
+		chats = Chat.objects(
+			(Q(user_from = self) | Q(user_to = self))
+			&
+			Q(start_datetime__gt = datetime.utcnow())
+			&
+			Q(start_datetime__lt = datetime.utcnow() + datetime.timeDelta(weeks=1))
+		)
+		return chats
+
+	def incoming_requests_this_week(self):
+		requests = Requests.objects(
+			Q(request_to = self)
+			&
+			Q(start_datetime__gt = datetime.utcnow())
+			&
+			Q(start_datime__lit = datetime.utcnow() + datetime.timeDelta(weeks=1))
+		)
+		return requests
+
+	def outgoing_requests_this_week(self):
+		requests = Requests.objects(
+			Q(request_from = self)
+			&
+			Q(start_datetime__gt = datetime.utcnow())
+			&
+			Q(start_datime__lit = datetime.utcnow() + datetime.timeDelta(weeks=1))
+		)
+		return requests
+
+	# Get's users availability in terms of their own timezone
+	def availability_tz(self):
+		returnArray = []
+		for available_slot in self.availability:
+			newSlot = available_slot
+			newSlot['start_time'] += self.timezone * 2
+			newSlot['end_time'] += self.timezone * 2
+			if newSlot['start_time'] < 0:
+				newSlot['day'] = newSlot['day'] - 1
+				newSlot['start_time'] = 48 + newSlot['start_time']
+			if newSlot['end_time'] < 0:
+				newSlot['end_time'] = 48 + newSlot['end_time']
+			if newSlot['start_time'] > 47:
+				newSlot['start_time'] = newSlot['start_time'] - 48
+				newSlot['day'] = newSlot['day'] + 1
+			if newSlot['end_time'] > 47:
+				newSlot['end_time'] = newSlot['end_time'] - 48
+			if newSlot['day'] < 0:
+				newSlot['day'] = 7 + newSlot['day']
+			if newSlot['day'] > 6:
+				newSlot['day'] = newSlot['day'] - 7
+			returnArray.append(newSlot)
+		return returnArray
+
+	# Gets next 7 days of availability in UTC datetime objects
+	def availability_this_week(self):
+		returnArray = []
+		for available_slot in self.availability:
+			# Get a UTC object for the next Monday/Tuesday/etc...
+			days_diff = available_slot['day']-today.weekday()
+			available_utc_day = today + datetime.timedelta(days=days_diff, weeks=1)
+			available_utc_day_midnight = datetime.datetime(
+				year = available_utc_day.year,
+				month = available_utc_day.month,
+				day = available_utc_day.day
+			)
+			# Get a UTC datetime object with the correct time as well
+			available_utc_start = (available_utc_day_midnight 
+				+ datetime.timeDelta(
+					minutes=(available_slot['start_time']*30
+				))
+			)
+			returnArray.append(available_utc_start)
+		return returnArray
 
 	def add_property(self, property_type, property_data, affinity):
 		# Check if property exists

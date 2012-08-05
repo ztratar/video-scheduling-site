@@ -19,5 +19,6 @@ urlpatterns = patterns('app.views',
 )
 
 urlpatterns += patterns('app.api',
-	url(r'^api/feed$', 'feed')
+	url(r'^api/feed$', 'feed'),
+	url(r'^api/user_availability_create$', 'user_availability_create')
 )

@@ -585,7 +585,8 @@ $(function() {
 		className: 'schedule-chat-dialog-view',
 
 		events: {
-			'click span.checkboxContainer': 'checkTheBox'
+			'click span.checkboxContainer': 'checkTheBox',
+			'submit #schedule-slots-form': 'submitForm'
 		},
 
 		init: function() {
@@ -611,6 +612,10 @@ $(function() {
 				target.children('input').attr('checked', 'checked');
 			}
 			return false;
+		},
+
+		submitForm: function() {
+			
 		}
 	
 	});
@@ -622,7 +627,8 @@ $(function() {
 		className: 'host-chats-dialog-view',
 
 		events: {
-			'click td.checkable': 'checkCalendarSlot'
+			'click td.checkable': 'checkCalendarSlot',
+			'submit #host-chats-form': 'formSubmit'
 		},
 
 		render: function() {
@@ -648,7 +654,7 @@ $(function() {
 			for (var i = 0; i < timeSectionArray.length; i++){
 				var tableRow = '<tr><td><span class="big">'+timeSectionArray[i].name+'</span><span>'+timeSectionArray[i].time+'</span></td>';
 				for(var y = 0; y < daysArray.length; y++){
-					tableRow += '<td class="checkable"><input type="checkbox" name="'+daysArray[y]+'_'+timeSectionArray[i].name.toLowerCase()+'"></td>';
+					tableRow += '<td class="checkable"><input type="checkbox" name="'+y+'_'+timeSectionArray[i].name.replace(' ','-').toLowerCase()+'"></td>';
 				}
 				tableRow += '</tr>';
 				this.$(".host-chats-table tbody").append(tableRow);
@@ -665,6 +671,26 @@ $(function() {
 				target.addClass('checked');
 				target.children('input').attr('checked','checked');
 			}
+			return false;
+		},
+
+		formSubmit: function() {
+			var checkedArray = []
+			this.$("input:checked").each(function(){
+				checkedArray.push($(this).attr('name'));
+			});
+
+			$.ajax({
+				type: 'POST',
+				url: '/api/user_availability_create',
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("X-CSRFToken", window.airety.csrf); 
+				},
+				data: {
+					'availability': checkedArray
+				}
+			});
+
 			return false;
 		}
 
