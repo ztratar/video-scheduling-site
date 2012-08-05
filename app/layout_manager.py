@@ -41,6 +41,7 @@ class LayoutManager(object):
 		c.update(csrf(request))
 		try:
 			user = get_current_user(request)
+			user.availability = user.availability_tz()
 			if user:
 				c['currentUser'] = model_encode(user)
 		except Exception:

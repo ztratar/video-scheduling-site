@@ -52,10 +52,16 @@ def user_availability_create(request):
 	#try:
 	data = parser.parse(request.POST.urlencode())
 	user = get_current_user(request)
-	availability_raw = data['availability']['']
+	if data.get('availability'):
+		availability_raw = data['availability']['']
+	else:
+		availability_raw = []
 	availability = []
+	if not isinstance(availability_raw, list):
+		availability_raw = [availability_raw]
 	for available_raw_item in availability_raw:
 		avail_data = string.split(available_raw_item, '_')
+		print avail_data
 		if avail_data[1] == 'morning':
 			time_array = [16, 18, 20, 22]
 		elif avail_data[1] == 'afternoon':
@@ -100,8 +106,7 @@ def user_availability_create(request):
 		availability_array.append(avail_document)
 	user.availability = availability_array
 	user.save()
-	return HttpResponse(model_encode(user))
-	return HttpResponse(model_encode(user.availability))
+	return HttpResponse(model_encode(user.availability_tz()), mimetype="application/json")
 	#except Exception:
 	#	return HttpResponse('Could not save availability')
 

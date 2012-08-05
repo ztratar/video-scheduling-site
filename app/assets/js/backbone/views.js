@@ -628,7 +628,7 @@ $(function() {
 
 		events: {
 			'click td.checkable': 'checkCalendarSlot',
-			'submit #host-chats-form': 'formSubmit'
+			'click #host-chats-submit': 'formSubmit'
 		},
 
 		render: function() {
@@ -650,11 +650,27 @@ $(function() {
 				},{
 					name: 'Night Owl',
 					time: '11PM-2AM'
-				}];
+				}],
+				currentUserAvail = window.airety.app.model.get('availability');
 			for (var i = 0; i < timeSectionArray.length; i++){
 				var tableRow = '<tr><td><span class="big">'+timeSectionArray[i].name+'</span><span>'+timeSectionArray[i].time+'</span></td>';
 				for(var y = 0; y < daysArray.length; y++){
-					tableRow += '<td class="checkable"><input type="checkbox" name="'+y+'_'+timeSectionArray[i].name.replace(' ','-').toLowerCase()+'"></td>';
+					var checked = false;
+					for (var z = 0; z < currentUserAvail.length; z++) {
+						if (currentUserAvail[z].day === y
+							&& currentUserAvail[z].start_time === 16 + (i * 8)) {
+							checked = true;
+						}
+					}
+					tableRow += '<td class="checkable';
+					if (checked) {
+						tableRow += ' checked';
+					}
+					tableRow += '"><input type="checkbox" name="'+y+'_'+timeSectionArray[i].name.replace(' ','-').toLowerCase()+'"';
+					if (checked) {
+						tableRow += ' checked="checked"';
+					}
+					tableRow += '></td>';
 				}
 				tableRow += '</tr>';
 				this.$(".host-chats-table tbody").append(tableRow);
@@ -666,10 +682,10 @@ $(function() {
 			var target = $(e.target);
 			if(target.hasClass('checked')){
 				target.removeClass('checked');
-				target.children('input').attr('checked','');
+				target.children('input').attr('checked', false);
 			} else {
 				target.addClass('checked');
-				target.children('input').attr('checked','checked');
+				target.children('input').attr('checked', true);
 			}
 			return false;
 		},
@@ -688,8 +704,13 @@ $(function() {
 				},
 				data: {
 					'availability': checkedArray
+				},
+				success: function(data) {
+					window.airety.app.model.set('availability', data);
 				}
 			});
+
+			window.airety.app.closeDialog();
 
 			return false;
 		}
