@@ -28,12 +28,16 @@ def model_encode_helper(obj):
 	else:
 		keys = bson.json_util._json_convert(obj)
 		returnObj = {}
-		for key in keys:
-			if (isinstance(obj[key], mongoengine.queryset.QuerySet)
-					or isinstance(obj[key], list)):
-				returnObj[key] = model_encode_helper(obj[key])
-			else:
-				returnObj[key] = obj[key]
+		if keys != bson.json_util.object_hook(keys):
+			for key in keys:
+				returnObj[key] = keys
+		else:
+			for key in keys:
+				if (isinstance(obj[key], mongoengine.queryset.QuerySet)
+						or isinstance(obj[key], list)):
+					returnObj[key] = model_encode_helper(obj[key])
+				else:
+					returnObj[key] = obj[key]
 		return returnObj
 
 def get_current_user(request):

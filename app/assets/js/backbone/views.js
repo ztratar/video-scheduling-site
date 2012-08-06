@@ -581,6 +581,7 @@ $(function() {
 	airetyApp.view.scheduleChatDialogView = airetyApp.view.baseView.extend({
 	
 		template: $("#scheduleChatDialogView-template").html(),
+		scheduleItemTemplate: $("#scheduleChatItemView-template").html(),
 
 		className: 'schedule-chat-dialog-view',
 
@@ -590,6 +591,10 @@ $(function() {
 		},
 
 		init: function() {
+			this.collection = new airetyApp.collection.userSchedule();
+			this.collection.url = this.model.url() + '/open_schedule';
+			this.collection.on('add', this.addOne, this);
+			this.collection.on('reset', this.addAll, this);
 		},
 
 		render: function() {
@@ -599,6 +604,7 @@ $(function() {
 				extended: true
 			});
 			this.showView('.card-column', this.cardView, { render: true });
+			this.collection.fetch();
 			return this;
 		},
 
@@ -612,6 +618,52 @@ $(function() {
 				target.children('input').attr('checked', 'checked');
 			}
 			return false;
+		},
+
+		addAll: function() {
+			var that = this;
+			this.collection.each(function(model) {
+				that.addOne(model);
+			});
+		},
+
+		addOne: function(model) {
+			var d = new Date(model.get('time')),
+				dS = d.getDate(),
+				S = 'th',
+				formattedDate;
+			if (dS === 1 || dS === 21 || dS === 31) {
+				S = 'st';
+			} else if (dS === 2 || dS === 22) {
+				S = 'nd';
+			} else if (dS === 3 || dS === 23) {
+				S = 'rd';
+			}
+			var dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+			var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+			formattedDate = dayNames[d.getDay()] + ', ' + monthNames[d.getMonth()] + ' ' + dS + S;
+
+			var h = d.getHours();
+			var m = d.getMinutes();
+			var timePost = 'AM';
+
+			if (h > 12) {
+				h = h - 12;
+				timePost = 'PM';
+			} else if (h === 12) {
+				timePost = 'PM';
+			} else if (h === 0) {
+				h = 12;
+			}
+			if (m < 10) {
+				m = m + '0';
+			}
+			var formattedTime = h + ':' + m + timePost;
+
+			this.$("ul.scheduleSlots").append(Mustache.render(this.scheduleItemTemplate, {
+				day: formattedDate,
+				time: formattedTime
+			}));
 		},
 
 		submitForm: function() {

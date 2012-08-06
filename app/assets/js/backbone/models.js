@@ -26,7 +26,7 @@
 	});
 
 	airetyApp.model.user = airetyApp.model.baseModel.extend({
-		urlRoot: '/users',
+		urlRoot: '/api/users',
 		initialize: function(options) {
 			this.on('change:fb_id', this.refreshImages);
 			if (options && options.fb_id) {
@@ -59,7 +59,6 @@
 		urlRoot: '/textChats'
 	});
 
-	
 	/* collections */
 
 	airetyApp.collection.baseCollection = Backbone.Collection.extend({
@@ -96,7 +95,8 @@
 	});
 
 	airetyApp.collection.users = airetyApp.collection.baseCollection.extend({
-		model: airetyApp.model.user
+		model: airetyApp.model.user,
+		urlRoot: '/api/users'
 	});
 
 	airetyApp.collection.chats = airetyApp.collection.baseCollection.extend({
@@ -105,6 +105,10 @@
 
 	airetyApp.collection.textChats = airetyApp.collection.baseCollection.extend({
 		model: airetyApp.model.textChat
+	});
+
+	airetyApp.collection.userSchedule = airetyApp.collection.baseCollection.extend({
+		model: airetyApp.model.baseModel
 	});
 
 	 //

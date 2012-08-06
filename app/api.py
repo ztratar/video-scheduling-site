@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.contrib.auth import login
 from mongoengine.queryset import DoesNotExist
 from querystring_parser import parser
+import datetime
 
 from app.models import *
 from app.helpers import get_current_user, model_encode 
@@ -30,11 +31,11 @@ def requests_create(request):
 		user2 = User.objects(id=request.POST['user_id'])[0]
 
 		for time in request.POST['times']:
-			r = Request(
+			r = ChatRequest(
 				request_from = user,
 				request_to = user2,
-				start_datetime = datetime.utcfromtimestamp(time['start']),
-				end_datetime = datetime.utcfromtimestamp(time['end']),
+				start_datetime = datetime.datetime.utcfromtimestamp(time['start']),
+				end_datetime = datetime.datetime.utcfromtimestamp(time['end']),
 				message = request.POST['message']
 			)
 			r.save()
@@ -110,78 +111,82 @@ def user_availability_create(request):
 	#except Exception:
 	#	return HttpResponse('Could not save availability')
 
-def user_availability(request,uid):
-	try:
-		returnArray = []
+def user_open_schedule(request,uid):
+	#try:
+	returnArray = []
 
-		user = User.objects(id=uid)[0]
-		current_user = get_current_user(request)
+	user = User.objects(id=uid)[0]
+	current_user = get_current_user(request)
+	
+	today = datetime.datetime.utcnow()
+
+	# Get all chats schedule by both users. Throw out times that overlap
+	chats_this_week = []
+	chats_this_week.extend(user.chats_this_week())
+	chats_this_week.extend(current_user.chats_this_week())
+
+	# Get current users outgoing requests. Do not allow double requests at
+	# a time
+	c_user_out_requests = current_user.outgoing_requests_this_week()
+
+	# Get current users incoming requests. Add as meta data so users do not
+	# double book.
+	c_user_in_requests = current_user.incoming_requests_this_week()
+
+	# Get target users incoming requests. Add as meta data to show how
+	# competitive a certain time spot is.
+	user_in_requests = user.incoming_requests_this_week()
+
+	# Get target users outgoing requests. Do not allow users to stack
+	# these as it may lead to a confusing cycle.
+	user_out_requests = user.outgoing_requests_this_week()
+
+	# Get next 7 days availability times as datetime UTC objects
+	user_availability = user.availability_this_week()
+
+	# Move through all the users' usually available slots and find the
+	# times that will actually work this week.	
+	for available_slot in user_availability:
 		
-		today = datetime.utcnow()
+		additionalMetaData = {
+			'time': available_slot,
+			'time_slot_competition': 0,
+			'request_overlap': []
+		}
 
-		# Get all chats schedule by both users. Throw out times that overlap
-		chats_this_week = []
-		chats_this_week.append(user.chats_this_week())
-		chats_this_week.append(current_user.chats_this_week())
-
-		# Get current users outgoing requests. Do not allow double requests at
-		# a time
-		c_user_out_requests = current_user.outgoing_requests_this_week()
-
-		# Get current users incoming requests. Add as meta data so users do not
-		# double book.
-		c_user_in_requests = current_user.incoming_requests_this_week()
-
-		# Get target users incoming requests. Add as meta data to show how
-		# competitive a certain time spot is.
-		user_in_requests = user.incoming_requests_this_week()
-
-		# Get target users outgoing requests. Do not allow users to stack
-		# these as it may lead to a confusing cycle.
-		user_out_requests = user.outgoing_requests_this_week()
-
-		# Get next 7 days availability times as datetime UTC objects
-		user_availability = user.availability_this_week()
-
-		# Move through all the users' usually available slots and find the
-		# times that will actually work this week.	
-		for available_slot in user_availability:
-			
-			additionalMetaData = {
-				time: available_slot,
-				time_slot_competition: 0,
-				request_overlap: []
-			}
-
-			for chat in chats_this_week:
-				if chat.start_datetime == available_slot:
-					break
-			else:
+		for chat in chats_this_week:
+			if chat.start_datetime == available_slot:
+				break
+		else:
+			if len(chats_this_week) > 0:
 				continue
 
-			for chat_request in c_user_out_requests:
-				if chat_request.start_datetime == available_slot:
-					break
-			else:
+		for chat_request in c_user_out_requests:
+			if chat_request.start_datetime == available_slot:
+				break
+		else:
+			if len(c_user_out_requests) > 0:
 				continue
 
-			for chat_request in user_out_requests:
-				if chat_request.start_datetime == available_slot:
-					break
-			else:
+		for chat_request in user_out_requests:
+			if chat_request.start_datetime == available_slot:
+				break
+		else:
+			if len(user_out_requests) > 0:
 				continue
 
-			for chat_request in c_user_in_requests:
-				if chat_request.start_datetime == available_slot:
-					additionalMetaData.request_overlap.append(chat_request)
+		for chat_request in c_user_in_requests:
+			if chat_request.start_datetime == available_slot:
+				additionalMetaData.request_overlap.append(chat_request)
 
-			for chat_request in user_in_requests:
-				if chat_request.start_datetime == available_slot:
-					additionalMetaData.time_slot_competition += 1
-			
-			returnArray.append(additionalMetaData)
+		for chat_request in user_in_requests:
+			if chat_request.start_datetime == available_slot:
+				additionalMetaData.time_slot_competition += 1
+		
+		returnArray.append(additionalMetaData)
 
-	except Exception as inst:
-		return HttpResponse('An error occured: '+str(inst.args))
+	return HttpResponse(model_encode(returnArray))
+	#except Exception as inst:
+	#	return HttpResponse('An error occured: '+str(inst.args))
 
 

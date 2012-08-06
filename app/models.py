@@ -1,6 +1,6 @@
 from django.db import models
 from mongoengine import *
-from datetime import datetime
+import datetime
 from mongoengine.django.auth import User as MongoUser
 from airety.utils import get_data_from_url
 
@@ -36,7 +36,7 @@ class UserAvailability(EmbeddedDocument):
 	start_time = IntField(required=True)
 	end_time = IntField(required=True)
 
-class Request(Document):
+class ChatRequest(Document):
 
 	request_from = ReferenceField('User', required=True)
 	request_to = ReferenceField('User', required=True)
@@ -66,8 +66,8 @@ class User(MongoUser):
 	fb_access_token = StringField(required=True)
 	is_admin = BooleanField(required=True, default=False)
 
-	created_at = DateTimeField(required=True, default=datetime.utcnow())
-	edited_at = DateTimeField(required=True, default=datetime.utcnow())
+	created_at = DateTimeField(required=True, default=datetime.datetime.utcnow())
+	edited_at = DateTimeField(required=True, default=datetime.datetime.utcnow())
 
 	gender = StringField()
 	bio = StringField()
@@ -78,14 +78,14 @@ class User(MongoUser):
 
 	has_availability = BooleanField(default=False)
 	availability = ListField(EmbeddedDocumentField(UserAvailability))
-	requests_out = ListField(ReferenceField('Request'))
-	requests_in = ListField(ReferenceField('Request'))
+	requests_out = ListField(ReferenceField('ChatRequest'))
+	requests_in = ListField(ReferenceField('ChatRequest'))
 
 	chats = ListField(ReferenceField('Chat'))
 
 	# Track
 	sign_in_count = IntField(default=0)
-	last_sign_in_at = DateTimeField(default=datetime.utcnow())
+	last_sign_in_at = DateTimeField(default=datetime.datetime.utcnow())
 	schedule_viewed_count = IntField(default=0)
 	chat_out_request_count = IntField(default=0)
 	chat_out_request_accepted_count = IntField(default=0)
@@ -120,29 +120,29 @@ class User(MongoUser):
 		chats = Chat.objects(
 			(Q(user_from = self) | Q(user_to = self))
 			&
-			Q(start_datetime__gt = datetime.utcnow())
+			Q(start_datetime__gt = datetime.datetime.utcnow())
 			&
-			Q(start_datetime__lt = datetime.utcnow() + datetime.timeDelta(weeks=1))
+			Q(start_datetime__lt = datetime.datetime.utcnow() + datetime.timedelta(weeks=1))
 		)
 		return chats
 
 	def incoming_requests_this_week(self):
-		requests = Requests.objects(
+		requests = ChatRequest.objects(
 			Q(request_to = self)
 			&
-			Q(start_datetime__gt = datetime.utcnow())
+			Q(start_datetime__gt = datetime.datetime.utcnow())
 			&
-			Q(start_datime__lit = datetime.utcnow() + datetime.timeDelta(weeks=1))
+			Q(start_datetime__lt = datetime.datetime.utcnow() + datetime.timedelta(weeks=1))
 		)
 		return requests
 
 	def outgoing_requests_this_week(self):
-		requests = Requests.objects(
+		requests = ChatRequest.objects(
 			Q(request_from = self)
 			&
-			Q(start_datetime__gt = datetime.utcnow())
+			Q(start_datetime__gt = datetime.datetime.utcnow())
 			&
-			Q(start_datime__lit = datetime.utcnow() + datetime.timeDelta(weeks=1))
+			Q(start_datetime__lt = datetime.datetime.utcnow() + datetime.timedelta(weeks=1))
 		)
 		return requests
 
@@ -173,6 +173,7 @@ class User(MongoUser):
 	# Gets next 7 days of availability in UTC datetime objects
 	def availability_this_week(self):
 		returnArray = []
+		today = datetime.datetime.utcnow()
 		for available_slot in self.availability:
 			# Get a UTC object for the next Monday/Tuesday/etc...
 			days_diff = available_slot['day']-today.weekday()
@@ -184,7 +185,7 @@ class User(MongoUser):
 			)
 			# Get a UTC datetime object with the correct time as well
 			available_utc_start = (available_utc_day_midnight 
-				+ datetime.timeDelta(
+				+ datetime.timedelta(
 					minutes=(available_slot['start_time']*30
 				))
 			)

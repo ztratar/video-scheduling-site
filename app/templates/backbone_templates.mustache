@@ -130,23 +130,7 @@
     <h3>Zach is probably free at the following times:</h3>
     <p>Pick all of the times that work for you. Zach will confirm one.</p>
     <form id="schedule-slots-form">
-      <ul class="scheduleSlots">
-        <li>
-          <span class="checkboxContainer">
-            <input name="slot" type="checkbox">
-          </span>
-          <span class="day">Monday, April 21st</span>
-          <span class="time">9:00PM</span>
-          </li>
-        <li>
-          <span class="checkboxContainer">
-            <input name="slot" type="checkbox">
-          </span>
-          <span class="day">Tuesday, April 22nd</span>
-          <span class="time">10:00PM</span>
-        </li>
-
-      </ul>
+      <ul class="scheduleSlots"></ul>
       <div class="textAreaWrap">
         <textarea name="why" placeholder="Why do you want to talk to Zach?"></textarea>
       </div>
@@ -155,6 +139,16 @@
       </div>
     </form>
   </div>
+</script>
+
+<script id="scheduleChatItemView-template" type="text/template">
+	<li>
+		<span class="checkboxContainer">
+			<input name="slot" type="checkbox">
+		</span>
+		<span class="day">{{day}}</span>
+		<span class="time">{{time}}</span>
+	</li>
 </script>
 
 <script id="hostChatsDialogView-template" type="text/template">
