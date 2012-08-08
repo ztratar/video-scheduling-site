@@ -75,16 +75,17 @@ def login_view(request):
 		user.picture_height = height
 		user.save()
 		if data.get('hometown'):
-			user.add_property('location', data['hometown'], 800)
+			user.add_property('location', data['hometown'], 650)
 		if data.get('location'):
-			user.add_property('location', data['location'], 900)
+			user.add_property('location', data['location'], 750)
 		for i in range(len(data['work'])):
-			work_score = 200 * (min(i,4)+1)/2
+			work_score = 200 * 3/(min(i,4)+1)
 			user.add_property('work', data['work'][i], work_score)
 		for i in range(len(data['education'])):
-			user.add_property('school', data['education'][i], 680)
+			user.add_property('school', data['education'][i], 680*(4+i)/4)
 		for i in range(len(data['inspirational_people'])):
 			user.add_property('inspirational_person', data['inspirational_people'][i], 200)
+		user.set_default_featured_properties()
 		return HttpResponse(model_encode(user), mimetype="application/json")
 	#except Exception:
     #    return HttpResponse('unknown error')

@@ -11,21 +11,33 @@ tok_secret = '3da704cbbda26bb38e50d430d0fecfd7ffc0269f'
 
 # UserLinkProperty
 #   A specific common trait among users.
-class UserProperty(Document):
+class UserProperty(Document, EmbeddedDocument):
+
+	def __unicode__(self):
+		return str(self.property_type) + ': ' + self.name
 
 	name = StringField(required=True)
 	fb_id = IntField()
+	position = StringField() # Used when embedded
 	property_type = StringField(required=True)
 	latlong = GeoPointField()
 	thumburl = StringField()
 
 class UserPropertyLink(Document):
 
+	def __unicode__(self):
+		return str(self.affinity) + ': ' + self.property_type
+
 	user = ReferenceField('User', required=True)
 	user_property_id = ObjectIdField(required=True)
 	property_type = StringField(required=True)
+	position = StringField()
+	description = StringField()
+	start_time = StringField()
+	end_time = StringField()
 	affinity = IntField(required=True, default=200)
 	affinity_actions = IntField(default=0)
+	highlighted = BooleanField(default=False)
 
 class UserAvailability(EmbeddedDocument):
 
@@ -78,6 +90,7 @@ class User(MongoUser):
 
 	has_availability = BooleanField(default=False)
 	availability = ListField(EmbeddedDocumentField(UserAvailability))
+	featured_properties = ListField(EmbeddedDocumentField(UserProperty))
 	requests_out = ListField(ReferenceField('ChatRequest'))
 	requests_in = ListField(ReferenceField('ChatRequest'))
 
@@ -92,9 +105,36 @@ class User(MongoUser):
 	chat_in_request_count = IntField(default=0)
 	chat_in_request_accepted_count = IntField(default=0)
 
-	def property_links(self):
-		return UserPropertyLink.objects(user=self)
-	
+	def set_default_featured_properties(self):
+		workLink = UserPropertyLink.objects(
+			user=self,
+			property_type='work'
+		).order_by('-affinity').limit(1)
+		schoolLink = UserPropertyLink.objects(
+			user=self,
+			property_type='school'
+		).order_by('-affinity').limit(1)
+		locationLink = UserPropertyLink.objects(
+			user=self,
+			property_type='location'
+		).order_by('-affinity').limit(1)
+		featuredProp = []
+		if len(workLink) > 0:
+			up = UserProperty.objects(id=workLink[0].user_property_id)[0]
+			up.position = workLink[0].position
+			featuredProp.append(up)
+		if len(schoolLink) > 0:
+			up = UserProperty.objects(id=schoolLink[0].user_property_id)[0]
+			up.position = schoolLink[0].position
+			featuredProp.append(up)
+		if len(locationLink) > 0:
+			up = UserProperty.objects(id=locationLink[0].user_property_id)[0]
+			up.position = locationLink[0].position
+			featuredProp.append(up)
+		self.featured_properties = featuredProp
+		self.save()
+		return
+
 	def getFullName(self):
 		return self.first_name + ' ' + self.last_name
 

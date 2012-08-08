@@ -107,20 +107,15 @@
     </p>
   </div>
   <ul class="darkCard compressSides">
+	{{#model.featured_properties}}
     <li class="listItem">
-      <img src="">
+      <img src="{{thumburl}}">
       <div class="withImage">
-        <h4 class="title">Backplane</h4>
-        <p class="description">Product Engineer</p>
+        <h4 class="title">{{name}}</h4>
+        <p class="description">{{position}}</p>
       </div>
     </li> 
-    <li class="listItem">
-      <img src="">
-      <div class="withImage">
-        <h4 class="title">Backplane</h4>
-        <p class="description">Product Engineer</p>
-      </div>
-    </li> 
+	{{/model.featured_properties}}
   </ul>
 </script>
 

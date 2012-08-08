@@ -19,8 +19,14 @@ def model_encode(obj):
 	return crapRemovedJson
 
 def model_encode_helper(obj):
-	if (isinstance(obj, mongoengine.queryset.QuerySet)
-			or isinstance(obj, list)):
+	if (isinstance(obj, float)):
+		return obj
+	elif (isinstance(obj, mongoengine.queryset.QuerySet)):
+		output = []
+		for model in obj:
+			output.append(model_encode_helper(model))
+		return output
+	elif (isinstance(obj, list)):
 		output = []
 		for model in obj:
 			output.append(model_encode_helper(model))
@@ -34,7 +40,8 @@ def model_encode_helper(obj):
 		else:
 			for key in keys:
 				if (isinstance(obj[key], mongoengine.queryset.QuerySet)
-						or isinstance(obj[key], list)):
+						or (isinstance(obj[key], list) and not isinstance(key,
+							int))):
 					returnObj[key] = model_encode_helper(obj[key])
 				else:
 					returnObj[key] = obj[key]
