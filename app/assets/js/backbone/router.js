@@ -15,18 +15,18 @@ $(function(){
 					logInAction = function() {
 						$("#primaryContainer").addClass('authed');
 						that.chatsToday = new airetyApp.collection.chats();
+						that.chatsToday.url = 'api/chats/upcoming';
 						that.chatsTodayView = new airetyApp.view.chatsTodayView({
 							collection: that.chatsToday
 						});
-						that.chatsToday.add({
-							id: 3
-						}).add({
-							id: 4
-						}).add({
-							id: 5
-						});
 						that.homeView.showView('.top-container', that.chatsTodayView);
-						that.chatsTodayView.center();
+						that.chatsToday.fetch({
+							success: function(model, data){
+								if (data.length > 0) {
+									that.chatsTodayView.center();
+								}
+							}
+						});
 					};
 				this.homeView = new airetyApp.view.homeView();
 				window.airety.app.showView('#primaryContainer', this.homeView, { render: true });

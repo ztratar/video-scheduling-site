@@ -1,1 +1,0 @@
-/Users/ztratar/Playground/airety/app/assets/js/home.js

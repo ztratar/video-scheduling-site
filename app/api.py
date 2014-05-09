@@ -5,6 +5,7 @@ from django.contrib.auth import login
 from mongoengine.queryset import DoesNotExist
 from querystring_parser import parser
 import datetime
+import time
 
 from app.models import *
 from app.helpers import get_current_user, model_encode 
@@ -18,31 +19,49 @@ def feed(request):
 	except DoesNotExist:
 		return HttpResponse('Cannot get your feed. Sorry!')
 
+def chats_upcoming(request):
+	try:
+		cuser = get_current_user(request)
+		chats = Chat.objects(
+			Q(user_from=cuser) | Q(user_to=cuser)
+		).order_by('-start_datetime').limit(3)
+		return HttpResponse(model_encode(chats), mimetype="application/json")
+	except DoesNotExist:
+		return HttpResponse([])
+
 def requests_create(request):
 	try:
-		if (not 'user_id' in request.POST or
-				not 'times' in request.POST or
-				not 'message' in request.POST):
-			return HttpResponse('Missing params')
+		data = parser.parse(request.POST.urlencode())
+		if not data.get('times'):
+			return HttpResponse('Missing times')
+		if not data.get('user_id'):
+			return HttpResponse('Missing User Id')
+		if not data.get('message'):
+			return HttpResponse('Missing message')
+
+		times = data['times']['']
 
 		returnArray = []
 		
 		user = get_current_user(request)
-		user2 = User.objects(id=request.POST['user_id'])[0]
+		user2 = User.objects(id=data['user_id'])[0]
 
-		for time in request.POST['times']:
+		for time in times:
 			r = ChatRequest(
 				request_from = user,
 				request_to = user2,
-				start_datetime = datetime.datetime.utcfromtimestamp(time['start']),
-				end_datetime = datetime.datetime.utcfromtimestamp(time['end']),
+				start_datetime = datetime.datetime.utcfromtimestamp(time/1000),
+				end_datetime = datetime.datetime.utcfromtimestamp(time/1000) + datetime.timedelta(minutes=30),
 				message = request.POST['message']
 			)
 			r.save()
 			returnArray.append(r)
 
-		user.requests_out.append(returnArray);
-		user2.requests_in.append(returnArray);
+		user.requests_out = user.requests_out + returnArray;
+		user2.requests_in = user.requests_in + returnArray;
+
+		user.save()
+		user2.save()
 
 		return HttpResponse(model_encode(returnArray))
 	except DoesNotExist:
@@ -62,7 +81,6 @@ def user_availability_create(request):
 		availability_raw = [availability_raw]
 	for available_raw_item in availability_raw:
 		avail_data = string.split(available_raw_item, '_')
-		print avail_data
 		if avail_data[1] == 'morning':
 			time_array = [16, 18, 20, 22]
 		elif avail_data[1] == 'afternoon':
@@ -146,7 +164,10 @@ def user_open_schedule(request,uid):
 
 	# Move through all the users' usually available slots and find the
 	# times that will actually work this week.	
+
 	for available_slot in user_availability:
+
+		addMeta = True
 		
 		additionalMetaData = {
 			'time': available_slot,
@@ -156,34 +177,26 @@ def user_open_schedule(request,uid):
 
 		for chat in chats_this_week:
 			if chat.start_datetime == available_slot:
-				break
-		else:
-			if len(chats_this_week) > 0:
-				continue
+				addMeta = False 
 
 		for chat_request in c_user_out_requests:
 			if chat_request.start_datetime == available_slot:
-				break
-		else:
-			if len(c_user_out_requests) > 0:
-				continue
+				addMeta = False
 
 		for chat_request in user_out_requests:
 			if chat_request.start_datetime == available_slot:
-				break
-		else:
-			if len(user_out_requests) > 0:
-				continue
+				addMeta = False
 
 		for chat_request in c_user_in_requests:
 			if chat_request.start_datetime == available_slot:
-				additionalMetaData.request_overlap.append(chat_request)
+				additionalMetaData['request_overlap'].append(chat_request)
 
 		for chat_request in user_in_requests:
 			if chat_request.start_datetime == available_slot:
-				additionalMetaData.time_slot_competition += 1
+				additionalMetaData['time_slot_competition'] += 1
 		
-		returnArray.append(additionalMetaData)
+		if addMeta:
+			returnArray.append(additionalMetaData)
 
 	return HttpResponse(model_encode(returnArray))
 	#except Exception as inst:

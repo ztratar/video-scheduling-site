@@ -374,6 +374,7 @@ $(function() {
 
 		init: function() {
 			$(window).on('scroll', this.scrolling);
+			this.activeChildren = [];
 			this.collection.on('reset', this.addAll, this);
 			this.collection.on('add', this.addOne, this);
 			this.render();
@@ -392,7 +393,7 @@ $(function() {
 
 		addAll: function() {
 			var that = this;
-			this.activeChildren.each(function(child) { 
+			_.each(this.activeChildren, function(child) { 
 				child.close();   
 			});
 			this.activeChildren = [];
@@ -413,6 +414,7 @@ $(function() {
 				view.$el.width('335').addClass('active');
 			}
 			this.activeChildren.push(view);
+			this.center();
 		},
 
 		showRoomOpts: function(e) {
@@ -587,7 +589,7 @@ $(function() {
 
 		events: {
 			'click span.checkboxContainer': 'checkTheBox',
-			'submit #schedule-slots-form': 'submitForm'
+			'click #schedule-chat-button': 'submitForm'
 		},
 
 		init: function() {
@@ -662,12 +664,34 @@ $(function() {
 
 			this.$("ul.scheduleSlots").append(Mustache.render(this.scheduleItemTemplate, {
 				day: formattedDate,
-				time: formattedTime
+				time: formattedTime,
+				timestamp: model.get('time')
 			}));
 		},
 
 		submitForm: function() {
-			
+			var checkedSlots = _.map(this.$('input[name="times"]:checked'), function(obj) {
+				return $(obj).val()
+			});
+			if (!checkedSlots.length) {
+				return false;
+			}
+			$.ajax({
+				url: '/api/requests/create',
+				type: 'POST',
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("X-CSRFToken", window.airety.csrf); 
+				},
+				data: {
+					'user_id': this.model.get('id'),
+					'times': checkedSlots,
+					'message': this.$('textarea[name="why"]').val()
+				},
+				success: function(data) {
+					debugger;
+				}
+			});
+			return false;
 		}
 	
 	});

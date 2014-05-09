@@ -21,5 +21,8 @@ urlpatterns = patterns('app.views',
 urlpatterns += patterns('app.api',
 	url(r'^api/feed$', 'feed'),
 	url(r'^api/user_availability_create$', 'user_availability_create'),
-	url(r'^api/users/(?P<uid>[0-9a-zA-Z]+)/open_schedule$', 'user_open_schedule')
+	url(r'^api/users/(?P<uid>[0-9a-zA-Z]+)/open_schedule$',
+		'user_open_schedule'),
+	url(r'^api/chats/upcoming', 'chats_upcoming'),
+	url(r'^api/requests/create$', 'requests_create')
 )

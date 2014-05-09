@@ -83,7 +83,7 @@
 <script id="chatsTodayItemView-template" type="text/template">
   <img src="{{picture}}">
   <div class="info">
-    <span>You have a chat with Zach in:</span>
+    <span>You have a chat with {{first_name}} in:</span>
     <span class="timer">2 hrs, 36 mins</span>
     <span class="sub-time">(that's 7:00PM)</span>
   </div>
@@ -122,15 +122,15 @@
 <script id="scheduleChatDialogView-template" type="text/template">
   <div class="card-column"></div>
   <div class="schedule-column whiteCard">
-    <h3>Zach is probably free at the following times:</h3>
-    <p>Pick all of the times that work for you. Zach will confirm one.</p>
+    <h3>{{first_name}} is probably free at the following times:</h3>
+    <p>Pick all of the times that work for you. {{first_name}} will confirm one.</p>
     <form id="schedule-slots-form">
       <ul class="scheduleSlots"></ul>
       <div class="textAreaWrap">
-        <textarea name="why" placeholder="Why do you want to talk to Zach?"></textarea>
+        <textarea name="why" placeholder="Why do you want to talk to {{first_name}}?"></textarea>
       </div>
       <div>
-        <a class="button">Send chat request</a>
+        <a id="schedule-chat-button" class="button">Send chat request</a>
       </div>
     </form>
   </div>
@@ -139,7 +139,7 @@
 <script id="scheduleChatItemView-template" type="text/template">
 	<li>
 		<span class="checkboxContainer">
-			<input name="slot" type="checkbox">
+			<input name="times" type="checkbox" value="{{timestamp}}">
 		</span>
 		<span class="day">{{day}}</span>
 		<span class="time">{{time}}</span>

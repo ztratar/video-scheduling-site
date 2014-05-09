@@ -61,6 +61,20 @@ class ChatRequest(Document):
 	
 	message = StringField(max_length=300)
 
+# Used in objects to store some basic user information
+class BasicUser(EmbeddedDocument):
+
+	username = StringField(required=True)
+	name = StringField(required=True)
+	first_name = StringField(required=True)
+	last_name = StringField(required=True)
+	email = StringField(required=True)
+	fb_id = IntField(required=True)
+	picture_url = StringField()
+	picture_width = IntField()
+	picture_height = IntField()
+	thumb_url = StringField()
+
 class User(MongoUser):
 
 	def __unicode__(self):
@@ -138,14 +152,19 @@ class User(MongoUser):
 	def getFullName(self):
 		return self.first_name + ' ' + self.last_name
 
-	def workplaces(self):
-		return UserLinkProperty.objects(id__in=self.property_links__user_property_id)
-
-	def schools(self):
-		return UserLinkProperty.objects(id__in=self.property_links__user_property_id)
-
-	def locations(self):
-		return UserLinkProperty.objects(id__in=self.property_links__user_property_id)
+	def get_basic_user_object(self):
+		return BasicUser(
+			username = self.username,
+			name = self.name,
+			first_name = self.first_name,
+			last_name = self.last_name,
+			email = self.email,
+			fb_id = self.fb_id,
+			picture_url = self.picture_url,
+			picture_width = self.picture_width,
+			picture_height = self.picture_height,
+			thumb_url = self.thumb_url
+		)
 
 	def check_access_token(self, access_token):
 		# todo: check access token
@@ -217,7 +236,7 @@ class User(MongoUser):
 		for available_slot in self.availability:
 			# Get a UTC object for the next Monday/Tuesday/etc...
 			days_diff = available_slot['day']-today.weekday()
-			available_utc_day = today + datetime.timedelta(days=days_diff, weeks=1)
+			available_utc_day = today + datetime.timedelta(days=days_diff)
 			available_utc_day_midnight = datetime.datetime(
 				year = available_utc_day.year,
 				month = available_utc_day.month,
@@ -327,6 +346,6 @@ class Chat(Document):
 
 	def gen_opentok_token(self):
 		self.init_opentok()
-		connectionMetadata = 'username=Bill' + '' + ', userLevel=4' # todo: username
+		connectionMetadata = 'username=' + self.user_from.username + ', userLevel=4'
 		token = opentok_sdk.generate_token(self.tok_session_id, OpenTokSDK.RoleConstants.PUBLISHER, None, connectionMetadata)
 		return token
